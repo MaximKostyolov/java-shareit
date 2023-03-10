@@ -16,14 +16,14 @@ public class ItemRepositoryImpl implements ItemRepository {
 
     private Integer itemId = 0;
 
-    private final Map<Integer, Map<Integer, Item>> ITEMS = new HashMap<>();
+    private final Map<Integer, Map<Integer, Item>> items = new HashMap<>();
 
-    private final Map<String, Item> ITEMSFORSEARCH = new LinkedHashMap<>();
+    private final Map<String, Item> itemsForSearch = new LinkedHashMap<>();
 
     @Override
     public List<Item> getAllItems(int userId) {
-        if (ITEMS.containsKey(userId)) {
-            return new ArrayList<>(ITEMS.get(userId).values());
+        if (items.containsKey(userId)) {
+            return new ArrayList<>(items.get(userId).values());
         } else {
             log.info("Пользователь не найден или у него нет вещей");
             throw new UserNotFoundException();
@@ -34,14 +34,14 @@ public class ItemRepositoryImpl implements ItemRepository {
     public ItemDto add(int userId, Item item) {
         setItemId(getItemId() + 1);
         item.setId(getItemId());
-        ITEMSFORSEARCH.put(item.getName() + item.getDescription() + item.getId() + item.getOwner().getId(), item);
+        itemsForSearch.put(item.getName() + item.getDescription() + item.getId() + item.getOwner().getId(), item);
         Map<Integer, Item> userItems = new HashMap<>();
-        if (ITEMS.containsKey(userId)) {
-            userItems = ITEMS.get(userId);
-            ITEMS.remove(userId);
+        if (items.containsKey(userId)) {
+            userItems = items.get(userId);
+            items.remove(userId);
         }
         userItems.put(item.getId(), item);
-        ITEMS.put(userId, userItems);
+        items.put(userId, userItems);
         log.info("Вещь создана");
         return ItemMapper.itemToItemDto(item);
     }
@@ -49,8 +49,8 @@ public class ItemRepositoryImpl implements ItemRepository {
     @Override
     public ItemDto update(int userId, int id, ItemDto itemDto) {
         Item updatedItem;
-        if (ITEMS.containsKey(userId)) {
-            Map<Integer, Item> userItems = ITEMS.get(userId);
+        if (items.containsKey(userId)) {
+            Map<Integer, Item> userItems = items.get(userId);
             if (userItems.containsKey(id)) {
                 Item item = userItems.get(id);
                 if ((itemDto.getName() == null) && (itemDto.getDescription() == null)) {
@@ -64,13 +64,13 @@ public class ItemRepositoryImpl implements ItemRepository {
                 }
                 if (updatedItem != null) {
                     userItems.remove(id);
-                    ITEMS.remove(userId);
-                    ITEMSFORSEARCH.remove(item.getName() + item.getDescription() + item.getId() +
+                    items.remove(userId);
+                    itemsForSearch.remove(item.getName() + item.getDescription() + item.getId() +
                             item.getOwner().getId());
-                    ITEMSFORSEARCH.put(updatedItem.getName() + updatedItem.getDescription() + updatedItem.getId() +
+                    itemsForSearch.put(updatedItem.getName() + updatedItem.getDescription() + updatedItem.getId() +
                             updatedItem.getOwner().getId(), updatedItem);
                     userItems.put(id, updatedItem);
-                    ITEMS.put(userId, userItems);
+                    items.put(userId, userItems);
                     log.info("Вещь обновлена");
                 }
             } else {
@@ -86,9 +86,9 @@ public class ItemRepositoryImpl implements ItemRepository {
 
     @Override
     public Optional<ItemDto> findById(int userId, int id) {
-        if (ITEMS.containsKey(userId)) {
-            if (ITEMS.get(userId).containsKey(id)) {
-                return Optional.of(ItemMapper.itemToItemDto(ITEMS.get(userId).get(id)));
+        if (items.containsKey(userId)) {
+            if (items.get(userId).containsKey(id)) {
+                return Optional.of(ItemMapper.itemToItemDto(items.get(userId).get(id)));
             } else {
                 log.info("Вещь с id = " + id + " не найдена");
                 return Optional.empty();
@@ -101,8 +101,8 @@ public class ItemRepositoryImpl implements ItemRepository {
 
     @Override
     public void delete(int userId, int id) {
-        if (ITEMS.containsKey(userId)) {
-            Map<Integer, Item> userItems = ITEMS.get(userId);
+        if (items.containsKey(userId)) {
+            Map<Integer, Item> userItems = items.get(userId);
             if (userItems.containsKey(id)) {
                 userItems.remove(id);
                 log.info("Вещь с id = " + id + " удалена");
@@ -119,9 +119,9 @@ public class ItemRepositoryImpl implements ItemRepository {
     @Override
     public List<ItemDto> findItems(String searchRequest) {
         List<ItemDto> searchedItems = new ArrayList<>();
-        for (String itemDescription : ITEMSFORSEARCH.keySet()) {
+        for (String itemDescription : itemsForSearch.keySet()) {
             if (itemDescription.toLowerCase().contains(searchRequest.toLowerCase())) {
-                Item item = ITEMSFORSEARCH.get(itemDescription);
+                Item item = itemsForSearch.get(itemDescription);
                 if (item.getAvailable()) {
                     searchedItems.add(ItemMapper.itemToItemDto(item));
                 }
