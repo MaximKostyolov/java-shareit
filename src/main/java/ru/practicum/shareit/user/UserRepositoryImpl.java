@@ -16,22 +16,22 @@ public class UserRepositoryImpl implements UserRepository {
 
     private Integer userId = 0;
 
-    private final Map<Integer, User> USERS = new HashMap<>();
+    private final Map<Integer, User> users = new HashMap<>();
 
-    private final Set<String> EMAILS = new HashSet<>();
+    private final Set<String> emails = new HashSet<>();
 
     @Override
     public List<User> getAllUsers() {
-        return new ArrayList<>(USERS.values());
+        return new ArrayList<>(users.values());
     }
 
     @Override
     public UserDto addUser(User user) {
-        if (!EMAILS.contains(user.getEmail())) {
+        if (!emails.contains(user.getEmail())) {
             setUserId(getUserId() + 1);
             user.setId(getUserId());
-            USERS.put(user.getId(), user);
-            EMAILS.add(user.getEmail());
+            users.put(user.getId(), user);
+            emails.add(user.getEmail());
             log.info("Пользователь создан");
         } else {
             log.info("Пользователь с таким e-mail уже cуществует");
@@ -43,8 +43,8 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public UserDto updateUser(int userId, UserDto userDto) {
         User updatedUser;
-        if (USERS.containsKey(userId)) {
-            User user = USERS.get(userId);
+        if (users.containsKey(userId)) {
+            User user = users.get(userId);
             if (userDto.getName() == null) {
                 updatedUser = updateEmail(user, userDto);
             } else if (userDto.getEmail() == null) {
@@ -53,8 +53,8 @@ public class UserRepositoryImpl implements UserRepository {
                 updatedUser = updateNameAndEmail(user, userDto);
             }
             if (updatedUser != null) {
-                USERS.remove(userId);
-                USERS.put(userId, updatedUser);
+                users.remove(userId);
+                users.put(userId, updatedUser);
                 log.info("Пользовател обновлен");
             }
         } else {
@@ -66,14 +66,14 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Optional<User> findById(int id) {
-        return Optional.ofNullable(USERS.get(id));
+        return Optional.ofNullable(users.get(id));
     }
 
     @Override
     public void deleteUser(int id) {
-        if (USERS.containsKey(id)) {
-            EMAILS.remove(USERS.get(id).getEmail());
-            USERS.remove(id);
+        if (users.containsKey(id)) {
+            emails.remove(users.get(id).getEmail());
+            users.remove(id);
             log.info("Пользователь с id = " + id + " удален");
         } else {
             log.info("Пользователь с id = " + id + " не найден");
@@ -82,14 +82,14 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     private User updateEmail(User user, UserDto userDto) {
-        if ((!EMAILS.contains(userDto.getEmail())) || (user.getEmail().equals(userDto.getEmail()))) {
-            EMAILS.remove(user.getEmail());
-            EMAILS.add(userDto.getEmail());
-            return User.builder().
-                    id(user.getId()).
-                    email(userDto.getEmail()).
-                    name(user.getName()).
-                    build();
+        if ((!emails.contains(userDto.getEmail())) || (user.getEmail().equals(userDto.getEmail()))) {
+            emails.remove(user.getEmail());
+            emails.add(userDto.getEmail());
+            return User.builder()
+                    .id(user.getId())
+                    .email(userDto.getEmail())
+                    .name(user.getName())
+                    .build();
         } else {
             log.info("Пользователь с таким e-mail уже cуществует");
             throw new DuplicateEmailException();
@@ -97,22 +97,22 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     private User updateName(User user, UserDto userDto) {
-        return User.builder().
-                id(user.getId()).
-                email(user.getEmail()).
-                name(userDto.getName()).
-                build();
+        return User.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .name(userDto.getName())
+                .build();
     }
 
     private User updateNameAndEmail(User user, UserDto userDto) {
-        if ((!EMAILS.contains(userDto.getEmail())) || (user.getEmail().equals(userDto.getEmail()))) {
-            EMAILS.remove(user.getEmail());
-            EMAILS.add(userDto.getEmail());
-            return User.builder().
-                    id(user.getId()).
-                    email(userDto.getEmail()).
-                    name(userDto.getName()).
-                    build();
+        if ((!emails.contains(userDto.getEmail())) || (user.getEmail().equals(userDto.getEmail()))) {
+            emails.remove(user.getEmail());
+            emails.add(userDto.getEmail());
+            return User.builder()
+                    .id(user.getId())
+                    .email(userDto.getEmail())
+                    .name(userDto.getName())
+                    .build();
         } else {
             log.info("Пользователь с таким e-mail уже cуществует");
             throw new DuplicateEmailException();

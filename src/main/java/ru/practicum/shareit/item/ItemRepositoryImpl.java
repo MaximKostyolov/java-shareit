@@ -131,43 +131,43 @@ public class ItemRepositoryImpl implements ItemRepository {
     }
 
     private Item updateName(ItemDto itemDto, Item item) {
-        return Item.builder().
-                id(item.getId()).
-                name(itemDto.getName()).
-                description(item.getDescription()).
-                available(item.getAvailable()).
-                owner(item.getOwner()).
-                build();
+        return Item.builder()
+                .id(item.getId())
+                .name(itemDto.getName())
+                .description(item.getDescription())
+                .available(item.getAvailable())
+                .owner(item.getOwner())
+                .build();
     }
 
     private Item updateDescription(ItemDto itemDto, Item item) {
-        return Item.builder().
-                id(item.getId()).
-                name(item.getName()).
-                description(itemDto.getDescription()).
-                available(item.getAvailable()).
-                owner(item.getOwner()).
-                build();
+        return Item.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .description(itemDto.getDescription())
+                .available(item.getAvailable())
+                .owner(item.getOwner())
+                .build();
     }
 
     private Item updateStatus(ItemDto itemDto, Item item) {
-        return Item.builder().
-                id(item.getId()).
-                name(item.getName()).
-                description(item.getDescription()).
-                available(itemDto.getAvailable()).
-                owner(item.getOwner()).
-                build();
+        return Item.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .description(item.getDescription())
+                .available(itemDto.getAvailable())
+                .owner(item.getOwner())
+                .build();
     }
 
     private Item fullUpdateItem(ItemDto itemDto, Item item) {
-        return Item.builder().
-                id(item.getId()).
-                name(itemDto.getName()).
-                description(itemDto.getDescription()).
-                available(itemDto.getAvailable()).
-                owner(item.getOwner()).
-                build();
+        return Item.builder()
+                .id(item.getId())
+                .name(itemDto.getName())
+                .description(itemDto.getDescription())
+                .available(itemDto.getAvailable())
+                .owner(item.getOwner())
+                .build();
     }
 
     public Integer getItemId() {
