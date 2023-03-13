@@ -1,4 +1,4 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.item.repository;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -16,14 +16,20 @@ public class ItemRepositoryImpl implements ItemRepository {
 
     private Integer itemId = 0;
 
-    private final Map<Integer, Map<Integer, Item>> items = new HashMap<>();
+    private final Map<Integer, Item> items = new HashMap<>();
 
-    private final Map<String, Item> itemsForSearch = new LinkedHashMap<>();
+    private final Map<String, Integer> itemsForSearch = new LinkedHashMap<>();
 
     @Override
     public List<Item> getAllItems(int userId) {
-        if (items.containsKey(userId)) {
-            return new ArrayList<>(items.get(userId).values());
+        List<Item> userItems = new ArrayList<>();
+        for (Item item : items.values()) {
+            if (item.getOwner().getId() == userId) {
+                userItems.add(item);
+            }
+        }
+        if (!userItems.isEmpty()) {
+            return userItems;
         } else {
             log.info("Пользователь не найден или у него нет вещей");
             throw new UserNotFoundException();
@@ -34,25 +40,18 @@ public class ItemRepositoryImpl implements ItemRepository {
     public ItemDto add(int userId, Item item) {
         setItemId(getItemId() + 1);
         item.setId(getItemId());
-        itemsForSearch.put(item.getName() + item.getDescription() + item.getId() + item.getOwner().getId(), item);
-        Map<Integer, Item> userItems = new HashMap<>();
-        if (items.containsKey(userId)) {
-            userItems = items.get(userId);
-            items.remove(userId);
-        }
-        userItems.put(item.getId(), item);
-        items.put(userId, userItems);
+        itemsForSearch.put(item.getName() + item.getDescription() + item.getOwner().getId(), item.getId());
+        items.put(item.getId(), item);
         log.info("Вещь создана");
         return ItemMapper.itemToItemDto(item);
     }
 
     @Override
     public ItemDto update(int userId, int id, ItemDto itemDto) {
-        Item updatedItem;
-        if (items.containsKey(userId)) {
-            Map<Integer, Item> userItems = items.get(userId);
-            if (userItems.containsKey(id)) {
-                Item item = userItems.get(id);
+        Item updatedItem = null;
+        if (items.containsKey(id)) {
+            Item item = items.get(id);
+            if (item.getOwner().getId() == userId) {
                 if ((itemDto.getName() == null) && (itemDto.getDescription() == null)) {
                     updatedItem = updateStatus(itemDto, item);
                 } else if (itemDto.getDescription() == null) {
@@ -63,56 +62,44 @@ public class ItemRepositoryImpl implements ItemRepository {
                     updatedItem = fullUpdateItem(itemDto, item);
                 }
                 if (updatedItem != null) {
-                    userItems.remove(id);
-                    items.remove(userId);
-                    itemsForSearch.remove(item.getName() + item.getDescription() + item.getId() +
-                            item.getOwner().getId());
-                    itemsForSearch.put(updatedItem.getName() + updatedItem.getDescription() + updatedItem.getId() +
-                            updatedItem.getOwner().getId(), updatedItem);
-                    userItems.put(id, updatedItem);
-                    items.put(userId, userItems);
+                    items.remove(id);
+                    itemsForSearch.remove(item.getName() + item.getDescription() + item.getOwner().getId());
+                    itemsForSearch.put(updatedItem.getName() + updatedItem.getDescription() +
+                            updatedItem.getOwner().getId(), updatedItem.getId());
+                    items.put(id, updatedItem);
                     log.info("Вещь обновлена");
                 }
             } else {
-                log.info("Вещь не найдена");
+                log.info("Некорректный запрос - у вещи другой владелец");
                 throw new ItemNotFoundException();
             }
         } else {
-            log.info("Пользователь не найден или у него нет вещей");
-            throw new UserNotFoundException();
+            log.info("Вещь не найдена");
+            throw new ItemNotFoundException();
         }
         return ItemMapper.itemToItemDto(updatedItem);
     }
 
     @Override
     public Optional<ItemDto> findById(int userId, int id) {
-        if (items.containsKey(userId)) {
-            if (items.get(userId).containsKey(id)) {
-                return Optional.of(ItemMapper.itemToItemDto(items.get(userId).get(id)));
-            } else {
-                log.info("Вещь с id = " + id + " не найдена");
-                return Optional.empty();
-            }
+        if (items.containsKey(id)) {
+            return Optional.of(ItemMapper.itemToItemDto(items.get(id)));
         } else {
-            log.info("Пользователь не найден или у пользователя нет вещей");
+            log.info("Вещь с id = " + id + " не найдена");
             return Optional.empty();
         }
     }
 
     @Override
     public void delete(int userId, int id) {
-        if (items.containsKey(userId)) {
-            Map<Integer, Item> userItems = items.get(userId);
-            if (userItems.containsKey(id)) {
-                userItems.remove(id);
-                log.info("Вещь с id = " + id + " удалена");
-            } else {
-                log.info("Вещь с id = " + id + " не найдена");
-                throw new ItemNotFoundException();
-            }
+        if (items.containsKey(id)) {
+            Item item = items.get(id);
+            items.remove(id);
+            itemsForSearch.remove(item.getName() + item.getDescription() + item.getOwner().getId());
+            log.info("Вещь с id = " + id + " удалена");
         } else {
-            log.info("Пользователь не найден или у пользователя нет вещей");
-            throw new UserNotFoundException();
+            log.info("Вещь с id = " + id + " не найдена");
+            throw new ItemNotFoundException();
         }
     }
 
@@ -121,7 +108,7 @@ public class ItemRepositoryImpl implements ItemRepository {
         List<ItemDto> searchedItems = new ArrayList<>();
         for (String itemDescription : itemsForSearch.keySet()) {
             if (itemDescription.toLowerCase().contains(searchRequest.toLowerCase())) {
-                Item item = itemsForSearch.get(itemDescription);
+                Item item = items.get(itemsForSearch.get(itemDescription));
                 if (item.getAvailable()) {
                     searchedItems.add(ItemMapper.itemToItemDto(item));
                 }
