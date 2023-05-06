@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
 import java.util.Map;
 
 
@@ -25,6 +26,7 @@ public class User {
     private Integer id;
 
     @Email
+    @NotNull
     @Column(unique = true, nullable = false)
     private String email;
 
