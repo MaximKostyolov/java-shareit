@@ -79,19 +79,13 @@ public class RequestServiceJpaImpl implements RequestService {
         if ((from >= 0) && (size > 0)) {
             Pageable page = PageRequest.of(0, size + from, Sort.by(Sort.Direction.DESC, "id"));
             List<ItemRequest> requests = requestRepository.findAllRequests(userId, page);
-            if (requests.size() > size) {
-                requests.subList(0, size);
-            }
             List<ItemRequestDto> requestDtos = new ArrayList<>();
-            if (requests.isEmpty()) {
-                return requestDtos;
-            }
             for (ItemRequest itemRequest : requests) {
                 List<ItemDto> itemDtos = ItemMapper.itemsToItemDtos(itemRepository
                         .findByRequestId(itemRequest.getId()));
                 requestDtos.add(RequestMapper.itemRequestToItemRequestDto(itemRequest, itemDtos));
             }
-            if (requestDtos.size() > size) {
+            if ((requestDtos.size() > size) && (!requestDtos.isEmpty())) {
                 return requestDtos.subList(from, requestDtos.size());
             } else {
                 return requestDtos;
