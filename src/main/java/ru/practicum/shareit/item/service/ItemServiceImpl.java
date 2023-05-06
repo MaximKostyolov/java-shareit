@@ -10,10 +10,10 @@ import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.item.comment.dto.CommentDto;
 import ru.practicum.shareit.item.comment.model.Comment;
 import ru.practicum.shareit.item.mapper.ItemMapper;
-import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.item.repository.ItemRepositoryImpl;
+import ru.practicum.shareit.user.repository.UserRepositoryImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,11 +22,11 @@ import java.util.List;
 @Service
 public class ItemServiceImpl implements ItemService {
 
-    private final ItemRepository itemRepository;
-    private final UserRepository userRepository;
+    private final ItemRepositoryImpl itemRepository;
+    private final UserRepositoryImpl userRepository;
 
     @Autowired
-    public ItemServiceImpl(ItemRepository itemRepository, UserRepository userRepository) {
+    public ItemServiceImpl(ItemRepositoryImpl itemRepository, UserRepositoryImpl userRepository) {
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
     }

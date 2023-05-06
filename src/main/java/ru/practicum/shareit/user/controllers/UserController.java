@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.service.UserServiceJpaImpl;
+import ru.practicum.shareit.user.service.UserServiceInMemoryImpl;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -20,10 +20,10 @@ import java.util.List;
 @RequestMapping(path = "/users")
 public class UserController {
 
-    private final UserServiceJpaImpl userService;
+    private final UserServiceInMemoryImpl userService;
 
     @Autowired
-    public UserController(UserServiceJpaImpl userService) {
+    public UserController(UserServiceInMemoryImpl userService) {
         this.userService = userService;
     }
 

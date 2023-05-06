@@ -4,10 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.UserNotFoundException;
-import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepositoryImpl;
 
 import java.util.List;
 
@@ -15,10 +15,10 @@ import java.util.List;
 @Service
 public class UserServiceInMemoryImpl implements UserService {
 
-    private final UserRepository repository;
+    private final UserRepositoryImpl repository;
 
     @Autowired
-    public UserServiceInMemoryImpl(UserRepository repository) {
+    public UserServiceInMemoryImpl(UserRepositoryImpl repository) {
         this.repository = repository;
     }
 
