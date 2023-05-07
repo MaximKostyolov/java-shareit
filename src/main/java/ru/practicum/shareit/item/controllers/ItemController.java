@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.comment.dto.CommentDto;
 import ru.practicum.shareit.item.comment.model.Comment;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.service.ItemServiceImpl;
+import ru.practicum.shareit.item.service.ItemServiceJpaImpl;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -21,12 +21,12 @@ import java.util.List;
 @RequestMapping("/items")
 public class ItemController {
 
-    private final ItemServiceImpl itemService;
+    private final ItemServiceJpaImpl itemService;
 
     private static final String HEADER = "X-Sharer-User-Id";
 
     @Autowired
-    public ItemController(ItemServiceImpl itemService) {
+    public ItemController(ItemServiceJpaImpl itemService) {
         this.itemService = itemService;
     }
 
