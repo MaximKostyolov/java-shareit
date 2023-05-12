@@ -125,8 +125,8 @@ class ItemControllerTest {
     @Test
     void getSearchedItems() {
         String searchRequest = "searchRequest";
-        mockMvc.perform(get("/items/search?{search}", searchRequest).
-                        param("text", searchRequest))
+        mockMvc.perform(get("/items/search?{search}", searchRequest)
+                        .param("text", searchRequest))
                 .andDo(print())
                 .andExpect(status().isOk());
 
