@@ -43,7 +43,7 @@ public class RequestServiceJpaImpl implements RequestService {
             if (!itemRequest.getDescription().isBlank()) {
                 itemRequest.setUser(userRepository.findById(userId).get());
                 itemRequest.setCreated(LocalDateTime.parse(LocalDateTime.now().format(DateTimeFormatter
-                        .ofPattern("yyyy-MM-dd'T'HH:mm"))));
+                        .ofPattern("yyyy-MM-dd'T'HH:mm:ss"))));
                 return RequestMapper.itemRequestToItemRequestDto(requestRepository.save(itemRequest));
             } else {
                 log.info("Ошибка валидации запроса на вещь");
