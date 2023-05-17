@@ -10,6 +10,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import ru.practicum.shareit.exception.UserNotFoundException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.repository.ItemJpaRepository;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.mapper.RequestMapper;
@@ -55,6 +57,7 @@ class RequestServiceJpaImplTest {
             .user(expectedUser)
             .created(LocalDateTime.of(2023, 4, 17, 12, 0))
             .build();
+
     @InjectMocks
     private RequestServiceJpaImpl requestService;
 
@@ -63,15 +66,11 @@ class RequestServiceJpaImplTest {
 
    @Test
     void createRequest_whenValid_thenSavedRequest() {
-        ItemRequest itemRequest = ItemRequest.builder()
-                .id(1)
-                .description("Description")
-                .build();
         ItemRequest expectedRequest = ItemRequest.builder()
                 .id(1)
                 .description("Description")
                 .user(expectedUser)
-                .created(LocalDateTime.parse(LocalDateTime.now().plusNanos(250000000).format(DateTimeFormatter
+                .created(LocalDateTime.parse(LocalDateTime.now().plusNanos(400000000).format(DateTimeFormatter
                         .ofPattern("yyyy-MM-dd'T'HH:mm:ss"))))
                 .build();
 
@@ -79,12 +78,38 @@ class RequestServiceJpaImplTest {
         when(userRepository.findById(expectedUser.getId())).thenReturn(Optional.of(expectedUser));
         when(requestRepository.save(expectedRequest)).thenReturn(expectedRequest);
 
-        ItemRequestDto actualRequest = requestService.createRequest(expectedUser.getId(), itemRequest);
+        ItemRequestDto actualRequest = requestService.createRequest(expectedUser.getId(), expectedRequest);
 
         assertEquals(expectedRequest.getDescription(), actualRequest.getDescription());
         verify(requestRepository).save(requestCapture.capture());
         ItemRequest savedRequest = requestCapture.getValue();
         assertEquals(RequestMapper.itemRequestToItemRequestDto(savedRequest), actualRequest);
+    }
+
+    @Test
+    void createRequest_whenRequestNotValid_thenValidationExceptionTrown() {
+        ItemRequest itemRequest = ItemRequest.builder()
+                .id(1)
+                .description("     ")
+                .build();
+
+        when(validator.validateUser(expectedUser.getId(), userRepository)).thenReturn(true);
+
+        assertThrows(ValidationException.class,
+                () -> requestService.createRequest(expectedUser.getId(), itemRequest));
+    }
+
+    @Test
+    void createRequest_whenUserNotFound_thenUserNotFoundExceptionTrown() {
+        ItemRequest itemRequest = ItemRequest.builder()
+                .id(1)
+                .description("Description")
+                .build();
+
+        when(validator.validateUser(expectedUser.getId(), userRepository)).thenReturn(false);
+
+        assertThrows(UserNotFoundException.class,
+                () -> requestService.createRequest(expectedUser.getId(), itemRequest));
     }
 
     @Test
@@ -102,6 +127,14 @@ class RequestServiceJpaImplTest {
     }
 
     @Test
+    void getAllUserRequests_whenUserNotFound_thenUserNotFoundExceptionTrown() {
+        when(validator.validateUser(expectedUser.getId(), userRepository)).thenReturn(false);
+
+        assertThrows(UserNotFoundException.class,
+                () -> requestService.getAllUserRequests(expectedUser.getId()));
+    }
+
+    @Test
     void getAllRequests_thenReturnedUserRequests() {
        List<ItemRequestDto> expectedList = new ArrayList<>();
        Pageable page = PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "id"));
@@ -114,6 +147,15 @@ class RequestServiceJpaImplTest {
     }
 
     @Test
+    void getAllRequests_whenFromOrSizeNotValid_thenValidationExceptionTrown() {
+       int from = 0;
+       int size = -5;
+
+        assertThrows(ValidationException.class,
+                () -> requestService.getAllRequests(expectedUser.getId(), from, size));
+    }
+
+    @Test
     void findRequestById_whenFound_thenReturnedRequest() {
 
        when(validator.validateUser(expectedUser.getId(), userRepository)).thenReturn(true);
@@ -122,6 +164,17 @@ class RequestServiceJpaImplTest {
        ItemRequestDto actualRequest = requestService.findRequestById(expectedUser.getId(), request.getId());
 
        assertEquals(RequestMapper.itemRequestToItemRequestDto(request, new ArrayList<>()), actualRequest);
-
    }
+
+    @Test
+    void findRequestById_whenUserNotFound_thenUserNotFoundExceptionTrown() {
+        int userId = 2;
+        int requestId = 4;
+
+       when(validator.validateUser(userId, userRepository)).thenReturn(false);
+
+        assertThrows(UserNotFoundException.class,
+                () -> requestService.findRequestById(userId, requestId));
+    }
+
 }

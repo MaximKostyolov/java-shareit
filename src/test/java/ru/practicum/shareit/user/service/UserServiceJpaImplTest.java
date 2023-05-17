@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.server.ResponseStatusException;
 import ru.practicum.shareit.exception.UserNotFoundException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
@@ -57,7 +58,7 @@ class UserServiceJpaImplTest {
     }
 
     @Test
-    void createUser_whenUserNotValid_thenValidationExceptionThrown() {
+    void createUser_whenUserNotValid_thenResponseStatusExceptionThrown() {
         User userToSave = User.builder().id(1).name("Name").email("email@mail.ru").build();
 
         when(userRepository.save(userToSave)).thenThrow(RuntimeException.class);
@@ -66,9 +67,17 @@ class UserServiceJpaImplTest {
                 () -> userService.createUser(userToSave));
     }
 
+    @Test
+    void createUser_whenUserNotValid_thenValidationExceptionThrown() {
+        User userToSave = new User();
+
+        assertThrows(ValidationException.class,
+                () -> userService.createUser(userToSave));
+    }
+
 
     @Test
-    void changeUser_whenUserFound_thenReturnedUpdatedUser() {
+    void changeUser_whenUpdateNameAndEmail_thenReturnedUpdatedUser() {
         int userId = 1;
         User oldUser = User.builder().id(1).name("Name").email("email@mail.ru").build();
 
@@ -83,6 +92,49 @@ class UserServiceJpaImplTest {
         User savedUser = userArgumentCaptor.getValue();
         assertEquals(newUser.getName(), actualUser.getName());
         assertEquals(newUser.getEmail(), actualUser.getEmail());
+        assertEquals(UserMapper.userToUserDto(savedUser), actualUser);
+    }
+
+    @Test
+    void changeUser_whenUpdateName_thenReturnedUpdatedUser() {
+        int userId = 1;
+        User oldUser = User.builder().id(1).name("Name").email("email@mail.ru").build();
+
+        User newUser = User.builder().id(1).name("newName").build();
+
+        User expectedUser = User.builder().id(1).name("newName").email("email@mail.ru").build();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(oldUser));
+        when(userRepository.save(expectedUser)).thenReturn(expectedUser);
+
+        UserDto actualUser = userService.changeUser(userId, UserMapper.userToUserDto(newUser));
+
+        verify(userRepository).save(userArgumentCaptor.capture());
+        User savedUser = userArgumentCaptor.getValue();
+        assertEquals(expectedUser.getName(), actualUser.getName());
+        assertEquals(expectedUser.getEmail(), actualUser.getEmail());
+        assertEquals(UserMapper.userToUserDto(savedUser), actualUser);
+    }
+
+    @Test
+    void changeUser_whenUpdateEmail_thenReturnedUpdatedUser() {
+        int userId = 1;
+        User oldUser = User.builder().id(1).name("Name").email("email@mail.ru").build();
+
+        User newUser = User.builder().id(1).email("newEmail@.yandex.ru").build();
+
+        User expectedUser = User.builder().id(1).name("Name").email("newEmail@.yandex.ru").build();
+
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(oldUser));
+        when(userRepository.save(expectedUser)).thenReturn(expectedUser);
+
+        UserDto actualUser = userService.changeUser(userId, UserMapper.userToUserDto(newUser));
+
+        verify(userRepository).save(userArgumentCaptor.capture());
+        User savedUser = userArgumentCaptor.getValue();
+        assertEquals(expectedUser.getName(), actualUser.getName());
+        assertEquals(expectedUser.getEmail(), actualUser.getEmail());
         assertEquals(UserMapper.userToUserDto(savedUser), actualUser);
     }
 
@@ -108,7 +160,6 @@ class UserServiceJpaImplTest {
         UserDto actualUser = userService.findUserById(userId);
 
         assertEquals(UserMapper.userToUserDto(expectedUser), actualUser);
-
     }
 
     @Test
@@ -117,10 +168,18 @@ class UserServiceJpaImplTest {
 
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-
         assertThrows(UserNotFoundException.class,
                 () -> userService.findUserById(userId));
+    }
 
+    @Test
+    void removeUser_whenUserNotFound_thenIllegalArgumentExceptionThrown() {
+        int userId = 1;
+
+        doThrow(IllegalArgumentException.class).when(userRepository).deleteById(userId);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> userService.removeUser(userId));
     }
 
 }

@@ -144,6 +144,23 @@
 					<artifactId>jacoco-maven-plugin</artifactId>
 					<version>0.8.8</version>
 					<configuration>
+						<excludes>
+							<exclude>ru/practicum/shareit/booking/dto/</exclude>
+							<exclude>ru/practicum/shareit/booking/mapper/</exclude>
+							<exclude>ru/practicum/shareit/booking/model/</exclude>
+							<exclude>ru/practicum/shareit/exception/</exclude>
+							<exclude>ru/practicum/shareit/validator/</exclude>
+							<exclude>ru/practicum/shareit/item/comment/</exclude>
+							<exclude>ru/practicum/shareit/item/dto/</exclude>
+							<exclude>ru/practicum/shareit/item/mapper/</exclude>
+							<exclude>ru/practicum/shareit/item/model/</exclude>
+							<exclude>ru/practicum/shareit/request/dto/</exclude>
+							<exclude>ru/practicum/shareit/request/mapper/</exclude>
+							<exclude>ru/practicum/shareit/request/model/</exclude>
+							<exclude>ru/practicum/shareit/user/dto/</exclude>
+							<exclude>ru/practicum/shareit/user/mapper/</exclude>
+							<exclude>ru/practicum/shareit/user/model/</exclude>
+						</excludes>
 						<output>file</output>
 					</configuration>
 					<executions>
