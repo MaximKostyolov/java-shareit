@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-class ShareItAppIntegrationTest {
+class IntegrationTests {
 
     @Autowired
     private UserServiceJpaImpl userService;
