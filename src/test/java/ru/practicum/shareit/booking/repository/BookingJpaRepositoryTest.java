@@ -35,19 +35,17 @@ class BookingJpaRepositoryTest {
     @Autowired
     private ItemJpaRepository itemRepository;
 
-    Booking booking1;
+    private Booking booking1;
 
-    Booking booking2;
+    private Booking booking2;
 
-    Booking booking3;
+    private Booking booking3;
 
-    Booking booking4;
+    private Booking booking4;
 
-    Booking booking5;
+    private Booking booking5;
 
-    Pageable page = PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "end"));
-
-
+    private Pageable page = PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "end"));
 
     @BeforeAll
     public void setUp() {

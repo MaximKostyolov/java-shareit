@@ -35,12 +35,11 @@ class ItemJpaRepositoryTest {
     @Autowired
     private RequestJpaRepository requestRepository;
 
-    Item item1;
+    private Item item1;
 
-    Item item2;
+    private Item item2;
 
-    Pageable page = PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "id"));
-
+    private Pageable page = PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "id"));
 
     @BeforeAll
     public void setUp() {
