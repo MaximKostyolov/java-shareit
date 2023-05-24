@@ -39,4 +39,7 @@ public class ItemDto {
 
     private List<CommentDto> comments;
 
+    public ItemDto() {
+
+    }
 }
